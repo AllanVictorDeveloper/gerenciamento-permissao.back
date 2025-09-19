@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: ${PROFILE:prod}
+  main:
+    allow-circular-references: true
+  jpa:
+    properties:
+      hibernate:
+        envers:
+          autoRegisterListeners: true
+          storeDataAtDelete: true
+
+  mvc:
+    dispatch-options-request: true
+  validation:
+    enabled: true
+
+
+logging:
+  level:
+    org.springframework.security: INFO
+    br.gov.rj.planejamento.pid.pidbackendjava.exceptions.RestExceptionHandler: OFF
+    org.hibernate.orm.connections.pooling: OFF
