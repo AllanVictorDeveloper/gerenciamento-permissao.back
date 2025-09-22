@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/sis_permissao_dev?useSSL=false&useUnicode=true&characterEncoding=UTF-8
     username: root
-    password: geprocseplag@2024
+    password: Dev@llan
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect

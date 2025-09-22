@@ -22,7 +22,7 @@ public class DataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) {
         // Criar permissões
-        List<String> permissoes = List.of("CONSULTAR", "EDITAR", "CADASTRAR", "EXCLUIR");
+        List<String> permissoes = List.of("Consultar", "Editar", "Cadastrar", "Excluir");
         for (String nome : permissoes) {
             permissaoRepository.findByNome(nome).orElseGet(() -> {
                 Permissao p = new Permissao();
@@ -32,28 +32,27 @@ public class DataLoader implements CommandLineRunner {
         }
 
         // Criar perfis
-        Perfil admin = perfilRepository.findByNome("ADMINISTRADOR").orElseGet(() -> {
+        Perfil admin = perfilRepository.findByNome("Administrador").orElseGet(() -> {
             Perfil p = new Perfil();
-            p.setNome("ADMINISTRADOR");
+            p.setNome("Administrador");
             p.setPermissoes(new HashSet<>(permissaoRepository.findAll())); // todas permissões
             return perfilRepository.save(p);
         });
 
-        perfilRepository.findByNome("COLABORADOR").orElseGet(() -> {
+        perfilRepository.findByNome("Colaborador").orElseGet(() -> {
             Perfil p = new Perfil();
-            p.setNome("COLABORADOR");
+            p.setNome("Colaborador");
             p.setPermissoes(Set.of(
-                    permissaoRepository.findByNome("CONSULTAR").get(),
-                    permissaoRepository.findByNome("EDITAR").get()
+                    permissaoRepository.findByNome("Consultar").get()
             ));
             return perfilRepository.save(p);
         });
 
-        perfilRepository.findByNome("USUARIO").orElseGet(() -> {
+        perfilRepository.findByNome("Usuario").orElseGet(() -> {
             Perfil p = new Perfil();
-            p.setNome("USUARIO");
+            p.setNome("Usuario");
             p.setPermissoes(Set.of(
-                    permissaoRepository.findByNome("CONSULTAR").get()
+                    permissaoRepository.findByNome("Consultar").get()
             ));
             return perfilRepository.save(p);
         });
