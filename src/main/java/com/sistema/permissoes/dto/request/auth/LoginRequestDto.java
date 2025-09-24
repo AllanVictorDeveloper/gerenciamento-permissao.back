@@ -21,5 +21,8 @@ public class LoginRequestDto {
     @Length(max=200, message="Este campo deve ter no máximo 200 caracteres.")
     private String senha;
 
+    @NotEmpty(message="Preenchimento Obrigatório.")
+    private String recaptcha;
+
 
 }

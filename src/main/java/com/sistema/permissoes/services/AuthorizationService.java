@@ -2,9 +2,11 @@ package com.sistema.permissoes.services;
 
 
 
+import com.sistema.permissoes.client.google.RecaptchaClient;
 import com.sistema.permissoes.dto.request.auth.LoginRequestDto;
 import com.sistema.permissoes.dto.request.auth.MudarSenhaRequestDto;
 import com.sistema.permissoes.dto.response.auth.LoginResponseDto;
+import com.sistema.permissoes.dto.response.auth.RecaptchaResponseDTO;
 import com.sistema.permissoes.dto.response.auth.TokenResponseDto;
 import com.sistema.permissoes.entidades.Usuario;
 import com.sistema.permissoes.exceptions.UnauthorizedException;
@@ -17,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,9 +30,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -42,6 +48,9 @@ public class AuthorizationService implements UserDetailsService {
 
     @Value("${api.jwt.refresh-token.expiration}")
     private Integer expirationRefreshToken;
+
+    @Value("${google.recaptcha.secret}")
+    private String recaptchaSecret;
 
     @Autowired
     private UsuarioRepository iUsuarioRepository;
@@ -56,6 +65,9 @@ public class AuthorizationService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RecaptchaClient recaptchaClient;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return this.iUsuarioRepository.findByEmail(username);
@@ -64,6 +76,10 @@ public class AuthorizationService implements UserDetailsService {
 
     @Transactional(rollbackFor = Exception.class)
     public LoginResponseDto login(LoginRequestDto requestDto, HttpServletRequest request) {
+
+        if(!this.validarRecaptcha(requestDto.getRecaptcha())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Falha na validação do reCAPTCHA.");
+        }
 
         if (!this.iUsuarioRepository.existsUsuarioByEmail(requestDto.getLogin()))
             throw new BadRequestException("Usuário inexistente ou senha inválida.");
@@ -87,6 +103,25 @@ public class AuthorizationService implements UserDetailsService {
                 .versao("1.0.0")
                 .build();
 
+    }
+
+    public boolean validarRecaptcha(String recaptchaToken) {
+        if (recaptchaToken == null || recaptchaToken.isEmpty()) {
+            return false;
+        }
+
+
+        Map<String, String> formData = new HashMap<>();
+        formData.put("secret", recaptchaSecret);
+        formData.put("response", recaptchaToken);
+
+        try {
+            RecaptchaResponseDTO response = recaptchaClient.verificar(formData);
+            return response != null && response.isSuccess();
+        } catch (Exception e) {
+            log.error("Erro ao validar reCAPTCHA: {}", e.getMessage());
+            return false;
+        }
     }
 
 

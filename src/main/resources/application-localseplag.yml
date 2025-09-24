@@ -13,6 +13,10 @@ spring:
       hibernate:
         format-sql: true
 
+google:
+  recaptcha:
+    secret: 6LfrFtQrAAAAAA-Tw2i2VCxqPZK1zn9AyWgRSVnq
+
 api:
   security:
     token:
